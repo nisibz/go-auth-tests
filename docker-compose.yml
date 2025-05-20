@@ -1,0 +1,11 @@
+services:
+  go-auth-tests:
+    container_name: go-auth-tests
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8080:8080
+    restart: unless-stopped
