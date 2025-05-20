@@ -9,8 +9,9 @@ import (
 // Container contains environment variables for the application, and http server
 type (
 	Container struct {
-		App  *App
-		HTTP *HTTP
+		App   *App
+		HTTP  *HTTP
+		Mongo *Mongo
 	}
 
 	// App contains all the environment variables for the application
@@ -25,6 +26,11 @@ type (
 		URL            string
 		Port           string
 		AllowedOrigins string
+	}
+
+	// Mongo contains all the environment variables for MongoDB
+	Mongo struct {
+		URI string
 	}
 )
 
@@ -49,8 +55,13 @@ func New() (*Container, error) {
 		AllowedOrigins: os.Getenv("HTTP_ALLOWED_ORIGINS"),
 	}
 
+	mongo := &Mongo{
+		URI: os.Getenv("DB_URI"),
+	}
+
 	return &Container{
 		app,
 		http,
+		mongo,
 	}, nil
 }
