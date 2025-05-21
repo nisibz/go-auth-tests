@@ -47,6 +47,11 @@ func (m *MockUserService) DeleteUser(ctx context.Context, id string) error {
 	return args.Error(0)
 }
 
+func (m *MockUserService) CountUsers(ctx context.Context) (int64, error) {
+	args := m.Called(ctx)
+	return args.Get(0).(int64), args.Error(1)
+}
+
 func TestGetUserByID_Success(t *testing.T) {
 	mockService := new(MockUserService)
 	handler := handlerhttp.NewUserHandler(mockService)

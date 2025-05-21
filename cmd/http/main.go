@@ -46,6 +46,21 @@ func main() {
 
 	userRepository := repository.NewUserRepository(mongoClient, appConfig.Mongo.DB_NAME, "user")
 	userService := service.NewUserService(userRepository)
+
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			<-ticker.C
+			count, err := userService.CountUsers(context.Background())
+			if err != nil {
+				slog.Error("Failed to count users", "error", err)
+				continue
+			}
+			slog.Info("User count in DB", "count", count)
+		}
+	}()
+
 	userHandler := http.NewUserHandler(userService)
 
 	authSvc := service.NewAuthService(userRepository)

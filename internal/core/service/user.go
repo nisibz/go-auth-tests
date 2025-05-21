@@ -80,3 +80,7 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+func (s *UserService) CountUsers(ctx context.Context) (int64, error) {
+	return s.userRepo.Count(ctx)
+}

@@ -12,6 +12,7 @@ type UserService interface {
 	ListUsers(ctx context.Context, limit, offset int64) ([]*domain.User, error)
 	UpdateUser(ctx context.Context, id, name, email string) (*domain.User, error)
 	DeleteUser(ctx context.Context, id string) error
+	CountUsers(ctx context.Context) (int64, error)
 }
 
 type UserRepository interface {
@@ -21,4 +22,5 @@ type UserRepository interface {
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, limit, offset int64) ([]*domain.User, error)
+	Count(ctx context.Context) (int64, error)
 }

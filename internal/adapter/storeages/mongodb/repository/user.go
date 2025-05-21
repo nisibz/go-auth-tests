@@ -121,3 +121,11 @@ func (r *UserRepository) List(ctx context.Context, limit, offset int64) ([]*mode
 	}
 	return users, nil
 }
+
+func (r *UserRepository) Count(ctx context.Context) (int64, error) {
+	count, err := r.collection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
