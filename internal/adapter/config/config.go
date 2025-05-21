@@ -9,9 +9,10 @@ import (
 // Container contains environment variables for the application, and http server
 type (
 	Container struct {
-		App   *App
-		HTTP  *HTTP
-		Mongo *Mongo
+		App          *App
+		HTTP         *HTTP
+		Mongo        *Mongo
+		JwtSecretKey *JWT
 	}
 
 	// App contains all the environment variables for the application
@@ -30,7 +31,12 @@ type (
 
 	// Mongo contains all the environment variables for MongoDB
 	Mongo struct {
-		URI string
+		URI     string
+		DB_NAME string
+	}
+
+	JWT struct {
+		JWT_SECRET_KEY string
 	}
 )
 
@@ -56,12 +62,18 @@ func New() (*Container, error) {
 	}
 
 	mongo := &Mongo{
-		URI: os.Getenv("DB_URI"),
+		URI:     os.Getenv("DB_URI"),
+		DB_NAME: os.Getenv("DB_NAME"),
+	}
+
+	jwt := &JWT{
+		JWT_SECRET_KEY: os.Getenv("JWT_SECRET_KEY"),
 	}
 
 	return &Container{
 		app,
 		http,
 		mongo,
+		jwt,
 	}, nil
 }

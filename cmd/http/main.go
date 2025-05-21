@@ -11,6 +11,8 @@ import (
 	"github.com/nisibz/go-auth-tests/internal/adapter/handler/http"
 	"github.com/nisibz/go-auth-tests/internal/adapter/logger"
 	"github.com/nisibz/go-auth-tests/internal/adapter/storeages/mongodb"
+	"github.com/nisibz/go-auth-tests/internal/adapter/storeages/mongodb/repository"
+	"github.com/nisibz/go-auth-tests/internal/core/service"
 )
 
 func main() {
@@ -42,9 +44,18 @@ func main() {
 		slog.Info("MongoDB connection closed.")
 	}()
 
+	userRepository := repository.NewUserRepository(mongoClient, appConfig.Mongo.DB_NAME, "user")
+	userService := service.NewUserService(userRepository)
+	userHandler := http.NewUserHandler(userService)
+
+	authSvc := service.NewAuthService(userRepository)
+	authHandler := http.NewAuthHandler(authSvc)
+
 	router, err := http.NewRouter(
 		appConfig.HTTP,
-		// mongoClient, // You might pass the client to your router/handlers later
+		authHandler,
+		userHandler,
+		userService,
 	)
 	if err != nil {
 		slog.Error("Error initializing router", "error", err)
