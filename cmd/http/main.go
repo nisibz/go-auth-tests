@@ -63,7 +63,11 @@ func main() {
 
 	userHandler := http.NewUserHandler(userService)
 
-	authSvc := service.NewAuthService(userRepository)
+	authSvc, err := service.NewAuthService(userRepository, appConfig)
+	if err != nil {
+		slog.Error("Error initializing AuthService", "error", err)
+		os.Exit(1)
+	}
 	authHandler := http.NewAuthHandler(authSvc)
 
 	router, err := http.NewRouter(

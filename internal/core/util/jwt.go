@@ -2,19 +2,27 @@ package util
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/nisibz/go-auth-tests/internal/adapter/config"
 )
 
-var jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+var jwtSecretKey []byte
 
 const tokenExpirationDuration = 24 * time.Hour // Token valid for 24 hours
 
 type Claims struct {
 	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
+}
+
+func InitJWTSecretKey(cfg *config.Container) error {
+	if cfg == nil || cfg.JwtSecretKey == nil || cfg.JwtSecretKey.JWT_SECRET_KEY == "" {
+		return fmt.Errorf("JWT secret key not found in config")
+	}
+	jwtSecretKey = []byte(cfg.JwtSecretKey.JWT_SECRET_KEY)
+	return nil
 }
 
 func GenerateToken(userID string) (string, error) {

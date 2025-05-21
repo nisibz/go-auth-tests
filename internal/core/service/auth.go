@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/nisibz/go-auth-tests/internal/adapter/config"
 	"github.com/nisibz/go-auth-tests/internal/core/domain"
 	"github.com/nisibz/go-auth-tests/internal/core/port"
 	"github.com/nisibz/go-auth-tests/internal/core/util"
@@ -16,10 +17,13 @@ type AuthService struct {
 	userRepo port.UserRepository
 }
 
-func NewAuthService(userRepo port.UserRepository) port.AuthService {
+func NewAuthService(userRepo port.UserRepository, cfg *config.Container) (port.AuthService, error) {
+	if err := util.InitJWTSecretKey(cfg); err != nil {
+		return nil, err
+	}
 	return &AuthService{
 		userRepo: userRepo,
-	}
+	}, nil
 }
 
 func (s *AuthService) Register(name, email, password string) (string, error) {
