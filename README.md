@@ -65,6 +65,22 @@ This project is a Go-based RESTful API demonstrating user authentication and man
 
    The server will start, typically on `0.0.0.0:8080` (or as configured in your `.env` file).
 
+## Running Tests
+
+To run the unit and integration tests for the project, use the following command:
+
+```bash
+go test ./...
+```
+
+This command will recursively run all tests in the repository.
+
+If you want to see detailed output, you can run:
+
+```bash
+go test -v ./...
+```
+
 ### Docker Setup
 
 You can also run the application using Docker:
