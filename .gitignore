@@ -14,7 +14,7 @@ tmp/
 log/
 
 # exclude any development-specific files
-*.env
+*.env*
 !.env.example
 *.log
 *.test

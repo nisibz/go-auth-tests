@@ -1,0 +1,26 @@
+# build stage
+FROM golang:1.24-alpine AS build
+
+# set working directory
+WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/go-auth-tests ./cmd/http/main.go
+
+# final stage
+FROM alpine:latest AS final
+
+# set working directory
+WORKDIR /app
+
+# copy binary
+COPY --from=build /app/bin/go-auth-tests ./
+
+EXPOSE 8080
+
+ENTRYPOINT [ "./go-auth-tests" ]
