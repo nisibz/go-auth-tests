@@ -13,12 +13,12 @@ import (
 	"github.com/nisibz/go-auth-tests/internal/adapter/storeages/mongodb"
 	"github.com/nisibz/go-auth-tests/internal/adapter/storeages/mongodb/repository"
 	"github.com/nisibz/go-auth-tests/internal/core/service"
+	"github.com/nisibz/go-auth-tests/internal/core/util"
 )
 
 func main() {
 	appConfig, err := config.New()
 	if err != nil {
-		slog.Error("Error loading environment variables", "error", err)
 		slog.Error("Error loading environment variables", "error", err)
 		os.Exit(1)
 	}
@@ -44,30 +44,17 @@ func main() {
 		slog.Info("MongoDB connection closed.")
 	}()
 
-	userRepository := repository.NewUserRepository(mongoClient, appConfig.Mongo.DB_NAME, "user")
-	userService := service.NewUserService(userRepository)
-
-	go func() {
-		ticker := time.NewTicker(10 * time.Second)
-		defer ticker.Stop()
-		for {
-			<-ticker.C
-			count, err := userService.CountUsers(context.Background())
-			if err != nil {
-				slog.Error("Failed to count users", "error", err)
-				continue
-			}
-			slog.Info("User count in DB", "count", count)
-		}
-	}()
-
-	userHandler := http.NewUserHandler(userService)
-
-	authSvc, err := service.NewAuthService(userRepository, appConfig)
+	err = util.InitJWTSecretKey(appConfig)
 	if err != nil {
-		slog.Error("Error initializing AuthService", "error", err)
+		slog.Error("Failed to initialize JWT secret key", "error", err)
 		os.Exit(1)
 	}
+
+	userRepository := repository.NewUserRepository(mongoClient, appConfig.Mongo.DB_NAME, "user")
+	userService := service.NewUserService(userRepository)
+	userHandler := http.NewUserHandler(userService)
+
+	authSvc := service.NewAuthService(userRepository)
 	authHandler := http.NewAuthHandler(authSvc)
 
 	router, err := http.NewRouter(
@@ -82,6 +69,20 @@ func main() {
 	}
 
 	slog.Info("Starting the application", "app", appConfig.App.Name, "env", appConfig.App.Env)
+
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+		for {
+			<-ticker.C
+			count, err := userService.CountUsers(context.Background())
+			if err != nil {
+				slog.Error("Failed to count users", "error", err)
+				continue
+			}
+			slog.Info("User count in DB", "count", count)
+		}
+	}()
 
 	listenAddr := fmt.Sprintf("%s:%s", appConfig.HTTP.URL, appConfig.HTTP.Port)
 	err = router.Serve(listenAddr)
